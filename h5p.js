@@ -6,39 +6,19 @@ H5PEditor.widgets.geogebra_editor = H5PEditor.GeogebraEditor = (function ($) {
     this.field = field;
     this.params = params;
     this.setValue = setValue;
-    this.geogebra = undefined;
+    this.data = h5p_get_data_obj(this.params);
+    this.applet = undefined;
   }
    
   C.prototype.appendTo = function ($container) {
-    var data = h5p_get_data_obj(this.params);
-
-    var el = build("div", "kekule_wrapper");
-    $container.append(el);
-    var el_applet_container = build("div", undefined, el);
-    el_applet_container.id = random_string();
-
-    this.geogebra = new geogebra_wrapper(el_applet_container, "editor");
-
-    //  load mode
-    var mode = "Figure";
-    if (data !== undefined && data.mode !== undefined && data.mode.length != 0) mode = data.mode;
-    this.menu = build_radio_menu(["Figure", "Match"], mode);
-    el.appendChild(this.menu); 
-
-    //  load data
-    if (data !== undefined && data.data !== undefined) {
-      this.geogebra.data = data.data;
-    }
+    this.applet = new geogebra_exercise("editor");
+    this.applet.data = this.data;
+    $container.append(this.applet.el);
   };
 
 
   C.prototype.save = function() {
-    var data = {
-      "data" : this.geogebra.data, 
-      "mode" : this.menu.getAttribute("data-selected"),
-      "elements" : this.geogebra.get_elements()
-    };
-    this.params = h5p_get_data_str(data);
+    this.params = h5p_get_data_str(this.applet.data);
     this.setValue(this.field, this.params);
   };
 
